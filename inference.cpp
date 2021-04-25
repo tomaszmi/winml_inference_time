@@ -117,7 +117,7 @@ const std::vector<std::int64_t>& Inference::GetOutputShape() const { return guts
 void Inference::Run(const float* data, std::size_t size, FloatResultViewer result_view) {
   ml::LearningModelBinding binding(guts_->session);
 
-  winrt::array_view<const float> frame_data_view(data, size);
+  winrt::array_view<const float> frame_data_view(data, static_cast<std::uint32_t>(size));
   binding.Bind(guts_->in_tensor.first, ml::TensorFloat::CreateFromArray(guts_->in_tensor.second, frame_data_view));
   binding.Bind(guts_->out_tensor.first, ml::TensorFloat::Create(guts_->out_tensor.second));
 

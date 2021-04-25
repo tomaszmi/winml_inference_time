@@ -30,3 +30,11 @@
 *.exe
 *.out
 *.app
+
+# visual studio specific
+.vs
+packages
+x86
+x64
+Release
+Debug
