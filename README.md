@@ -2,7 +2,7 @@
 
 ## Problem statement
 
-It seems that WinML inference duration is corelated with the frequency with which it is called. The more frequent called the faster it is.
+It seems that WinML inference duration is correlated with the frequency with which it is called. The more frequent called the faster it is.
 
 ## Experiment
 
@@ -33,6 +33,14 @@ The inference durations are stored to the `winml_durations.txt` file, generated 
 
 ```
 $ ~/Anaconda3/python visualize_durations.py winml_durations.txt
+         inference_dur
+                   min  max    mean        std
+nap_time
+0                   24   41  27.704   2.028423
+50                  24   54  34.514   3.351572
+100                 33  111  50.904  12.513328
+150                 35  111  56.126  13.421634
+200                 35  112  50.826  13.448516
 ```
 
 ![WinML inference durations for various sleep durations](winml_inference_times.png)

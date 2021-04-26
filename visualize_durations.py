@@ -11,7 +11,8 @@ with open('winml_durations.txt') as f:
 			inference_times.append((int(nap_time), int(duration)))
 
 df = pd.DataFrame(inference_times, columns=['nap_time', 'inference_dur'])
-df.groupby('nap_time').agg({'inference_dur': ['min', 'max', 'mean', 'std']})
+groupped = df.groupby('nap_time').agg({'inference_dur': ['min', 'max', 'mean', 'std']})
+print(groupped.to_string())
 p = df.boxplot(column=['inference_dur'], by='nap_time')
 p.set_xlabel('nap_time [ms]')
 p.set_ylabel('duration [ms]')

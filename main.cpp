@@ -71,7 +71,7 @@ int main(int argc, char** argv) try {
 
   std::ofstream durations_out("./winml_durations.txt");
   using namespace std::chrono_literals;
-  constexpr std::size_t number_of_iterations = 100;
+  constexpr std::size_t number_of_iterations = 1000;
 
   RunAndMeasure(inference, number_of_iterations, 0ms, durations_out);
   RunAndMeasure(inference, number_of_iterations, 50ms, durations_out);
