@@ -35,3 +35,5 @@ The inference durations are stored to the `winml_durations.txt` file, generated 
 $ ~/Anaconda3/python visualize_durations.py winml_durations.txt
 ```
 
+![WinML inference durations for various sleep durations](winml_inference_times.png)
+
