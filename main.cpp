@@ -34,8 +34,10 @@ std::vector<float> CreateRandomInput(const std::vector<std::int64_t>& shape) {
   return result;
 }
 
-void RunAndMeasure(Inference& inference, std::chrono::milliseconds nap_time, std::ostream& durations_out) {
-  constexpr std::size_t number_of_iterations = 100;
+void RunAndMeasure(Inference& inference, std::size_t number_of_iterations, std::chrono::milliseconds nap_time,
+                   std::ostream& durations_out) {
+  std::cout << "Running " << number_of_iterations << " inference iterations with " << nap_time.count()
+            << " ms sleep in between" << std::endl;
   for (std::size_t i = 0; i < number_of_iterations; i++) {
     const auto input = CreateRandomInput(inference.GetInputShape());
     const auto out_size = GetSizeFromShape(inference.GetOutputShape());
@@ -48,8 +50,6 @@ void RunAndMeasure(Inference& inference, std::chrono::milliseconds nap_time, std
       }
     });
     const auto ts2 = std::chrono::steady_clock::now();
-
-    std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(ts2 - ts1).count() << std::endl;
     durations_out << nap_time.count() << " " << std::chrono::duration_cast<std::chrono::milliseconds>(ts2 - ts1).count()
                   << std::endl;
     std::this_thread::sleep_for(nap_time);
@@ -59,20 +59,28 @@ void RunAndMeasure(Inference& inference, std::chrono::milliseconds nap_time, std
 } // namespace
 
 int main(int argc, char** argv) try {
+  if (argc < 2) {
+    std::cerr << "Usage:\n" << argv[0] << " /PATH/TO/THE/MODEL.onnx" << std::endl;
+    return 1;
+  }
+
+  std::cout << "Using model " << argv[1] << std::endl;
+
   const bool is_gpu_available = DisplayGPUInventory(std::wcout);
   Inference inference{argv[1], is_gpu_available ? Inference::DeviceType::DirectX : Inference::DeviceType::Default};
 
   std::ofstream durations_out("./winml_durations.txt");
+  using namespace std::chrono_literals;
+  constexpr std::size_t number_of_iterations = 100;
 
-  std::cout << "-------------------------------- 0" << std::endl;
-  RunAndMeasure(inference, std::chrono::milliseconds{0}, durations_out);
-  std::cout << "-------------------------------- 50" << std::endl;
-  RunAndMeasure(inference, std::chrono::milliseconds{50}, durations_out);
-  std::cout << "-------------------------------- 100" << std::endl;
-  RunAndMeasure(inference, std::chrono::milliseconds{100}, durations_out);
-  std::cout << "-------------------------------- 150" << std::endl;
-  RunAndMeasure(inference, std::chrono::milliseconds{150}, durations_out);
+  RunAndMeasure(inference, number_of_iterations, 0ms, durations_out);
+  RunAndMeasure(inference, number_of_iterations, 50ms, durations_out);
+  RunAndMeasure(inference, number_of_iterations, 100ms, durations_out);
+  RunAndMeasure(inference, number_of_iterations, 150ms, durations_out);
+  RunAndMeasure(inference, number_of_iterations, 200ms, durations_out);
 
+  std::cout << "The inference durations have been saved in ./winml_durations.txt." << std::endl;
+  std::cout << "Run `python ./winml_durations.txt` to visualize the results." << std::endl;
 } catch (winrt::hresult_error& e) {
   std::wcerr << "hresult_error [" << std::hex << e.code() << "]: " << e.message().c_str() << std::endl;
 } catch (std::exception& e) {
