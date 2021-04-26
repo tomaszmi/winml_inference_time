@@ -43,5 +43,5 @@ nap_time
 200                 35  112  50.826  13.448516
 ```
 
-![WinML inference durations for various sleep durations](winml_inference_times.png)
+![WinML GPU inference durations for various sleep durations](winml_inference_times_gpu.png)
 
