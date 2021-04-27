@@ -83,8 +83,8 @@ std::uint32_t FloatResultView::GetMany(std::uint32_t start_index, float* dest, s
 
 struct Inference::Impl {
   Impl(const std::filesystem::path& model_path, Inference::DeviceType dev_type)
-      : model{ml::LearningModel::LoadFromFilePath(model_path.native())}, device{ConvertToLMDevKind(dev_type)},
-        session{model, device} {
+      : model{ml::LearningModel::LoadFromFilePath(model_path.native())}, device{ConvertToLMDevKind(dev_type)} {
+    ResetSession();
     if (model.InputFeatures().Size() != 1) {
       throw std::runtime_error("a single input feature is expected");
     }
@@ -95,20 +95,36 @@ struct Inference::Impl {
     out_tensor = ExtractTensorInfo(model.OutputFeatures().GetAt(0));
   }
 
-  void ResetSession() { session = {model, device}; }
+  void ResetSession() {
+    if (intra_op_num_threads == 0) {
+      session = {model, device};
+    } else {
+      auto options = ml::LearningModelSessionOptions();
+      auto nativeOptions = options.as<ILearningModelSessionOptionsNative>();
+      nativeOptions->SetIntraOpNumThreadsOverride(intra_op_num_threads);
+      session = {model, device, options};
+    }
+  }
 
   ml::LearningModel model;
   ml::LearningModelDevice device;
-  ml::LearningModelSession session;
+  ml::LearningModelSession session{nullptr};
 
   std::pair<std::wstring_view, std::vector<std::int64_t>> in_tensor;
   std::pair<std::wstring_view, std::vector<std::int64_t>> out_tensor;
+
+  std::uint32_t intra_op_num_threads = 0;
 };
 
 Inference::Inference(const std::filesystem::path& model_path, Inference::DeviceType dev_type)
     : guts_{std::make_unique<Impl>(model_path, dev_type)} {}
 
 Inference::~Inference() = default;
+
+void Inference::SetIntraOpNumThreads(std::uint32_t threads_count) {
+  guts_->intra_op_num_threads = threads_count;
+  guts_->ResetSession();
+}
 
 const std::vector<std::int64_t>& Inference::GetInputShape() const { return guts_->in_tensor.second; }
 

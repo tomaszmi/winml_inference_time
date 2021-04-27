@@ -69,6 +69,8 @@ int main(int argc, char** argv) try {
   const bool is_gpu_available = DisplayGPUInventory(std::wcout);
   Inference inference{argv[1], is_gpu_available ? Inference::DeviceType::DirectX : Inference::DeviceType::Default};
 
+  inference.SetIntraOpNumThreads(1);
+
   std::ofstream durations_out("./winml_durations.txt");
   using namespace std::chrono_literals;
   constexpr std::size_t number_of_iterations = 1000;

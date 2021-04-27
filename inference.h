@@ -29,6 +29,11 @@ public:
   explicit Inference(const std::filesystem::path& model_path, DeviceType dev_type = DeviceType::Default);
   ~Inference();
 
+  /**
+	Value 0 sets default number of threads.
+   */
+  void SetIntraOpNumThreads(std::uint32_t threads_count);
+
   const std::vector<std::int64_t>& GetInputShape() const;
   const std::vector<std::int64_t>& GetOutputShape() const;
 
